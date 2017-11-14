@@ -230,7 +230,7 @@ def get_available_builders():
 
 
 def run_tesseract(input_filename, output_filename_base, cwd=None, lang=None,
-                  flags=None, configs=None):
+                  flags=None, configs=None, parallel=False):
     '''
     Runs Tesseract:
         `TESSERACT_CMD` \
@@ -254,6 +254,14 @@ def run_tesseract(input_filename, output_filename_base, cwd=None, lang=None,
     '''
     _set_environment()
 
+    environment = None
+    # OMP_THREAD_LIMIT limits the number of threads used by tesseract to do its processing
+    # Setting it to 1 allows to take care of parallelization ourselves (with the multiprocessing module
+    # for example)
+    if parallel:
+        environment = os.environ.copy()
+        environment["OMP_THREAD_LIMIT"] = "1"
+
     command = [TESSERACT_CMD, input_filename, output_filename_base]
 
     if lang is not None:
@@ -269,7 +277,8 @@ def run_tesseract(input_filename, output_filename_base, cwd=None, lang=None,
                             startupinfo=g_subprocess_startup_info,
                             creationflags=g_creation_flags,
                             stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT)
+                            stderr=subprocess.STDOUT,
+                            env=environment)
     # Beware that in some cases, tesseract may print more on stderr than
     # allowed by the buffer of subprocess.Popen.stderr. So we must read stderr
     # asap or Tesseract will remain stuck when trying to write again on stderr.
@@ -325,7 +334,7 @@ def temp_dir():
         shutil.rmtree(path)
 
 
-def image_to_string(image, lang=None, builder=None):
+def image_to_string(image, lang=None, builder=None, parallel=False):
     '''
     Runs tesseract on the specified image. First, the image is written to disk,
     and then the tesseract command is run on the image. Tesseract's result is
@@ -353,7 +362,8 @@ def image_to_string(image, lang=None, builder=None):
         (status, errors) = run_tesseract("input.bmp", "output", cwd=tmpdir,
                                          lang=lang,
                                          flags=builder.tesseract_flags,
-                                         configs=builder.tesseract_configs)
+                                         configs=builder.tesseract_configs,
+                                         parallel=parallel)
         if status:
             raise TesseractError(status, errors)
 
