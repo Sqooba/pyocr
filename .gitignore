@@ -3,3 +3,5 @@
 build/
 dist/
 pyocr.egg-info/
+venv
+.idea
