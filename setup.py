@@ -11,7 +11,7 @@ setup(
     # - ChangeLog
     # - push
     # - tag
-    version="0.4.7",
+    version="1.0.0",
     description=("A Python wrapper for OCR engines (Tesseract, Cuneiform,"
                  " etc)"),
     keywords="tesseract cuneiform ocr",
