@@ -178,7 +178,7 @@ def detect_orientation(image, lang=None):
     """
     _set_environment()
     with temp_dir() as tmpdir:
-        command = [TESSERACT_CMD, "input.bmp", 'stdout', "-psm", "0"]
+        command = [TESSERACT_CMD, "input.bmp", 'stdout', "-psm", "0", "--oem", "0"]
         if lang is not None:
             command += ['-l', lang]
 
